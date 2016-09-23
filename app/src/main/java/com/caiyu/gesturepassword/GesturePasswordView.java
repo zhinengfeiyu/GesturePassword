@@ -4,11 +4,12 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
+import android.graphics.Path;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,6 @@ public class GesturePasswordView extends View {
     private int[] X;
     private int[] Y;
 
-    private Paint clearLinePaint;
     private Paint linePaint;
     private Paint whitePointPaint;
     private Paint redPointPaint;
@@ -36,12 +36,10 @@ public class GesturePasswordView extends View {
 
     private Bitmap mBitmap;
     private Canvas mCanvas;
+
+    private Path mPath;
     
     private List<Integer> inputList = new ArrayList<>();
-    private float lastEventX;
-    private float lastEventY;
-    private float lastStartX = -1;
-    private float lastStartY = -1;
 
     private OnCompleteListener mOnCompleteListener;
 
@@ -58,13 +56,9 @@ public class GesturePasswordView extends View {
     private void init() {
         POINT_RADIUS = Util.dp2px(getContext(), 15);
 
-        clearLinePaint = new Paint();
-        //clearLinePaint.setAntiAlias(true);
-        clearLinePaint.setStrokeWidth(Util.dp2px(getContext(), 2));
-        clearLinePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
-
         linePaint = new Paint();
-        //linePaint.setAntiAlias(true);
+        linePaint.setAntiAlias(true);
+        linePaint.setStyle(Paint.Style.STROKE);
         linePaint.setColor(COLOR_RED);
         linePaint.setStrokeWidth(Util.dp2px(getContext(), 2));
 
@@ -77,6 +71,8 @@ public class GesturePasswordView extends View {
         redPointPaint.setColor(COLOR_RED);
 
         mBitmapPaint = new Paint();
+
+        mPath = new Path();
     }
 
     @Override
@@ -124,24 +120,17 @@ public class GesturePasswordView extends View {
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                reset();
             case MotionEvent.ACTION_MOVE:
                 if (!inputList.isEmpty()) {
                     int selectedIndex = getSelectedPoint(event.getX(), event.getY());
                     if (selectedIndex == -1) {
-                        clearOldLine();
                         drawNewLine(event.getX(), event.getY());
                     }
-                    else {
+                    else {  //触摸到某个点
                         if (selectedIndex != inputList.get(inputList.size() - 1)) {
-                            clearOldLine();
-                            mCanvas.drawLine(
-                                    X[inputList.get(inputList.size() - 1)],
-                                    Y[inputList.get(inputList.size() - 1)],
-                                    X[selectedIndex],
-                                    Y[selectedIndex],
-                                    linePaint);
-                            invalidate();
-                            lastStartX = lastStartY = -1;
+                            drawNewLine(X[selectedIndex], Y[selectedIndex]);
+                            mPath = new Path();
                             if (!inputList.contains(selectedIndex)) {
                                 mCanvas.drawCircle(X[selectedIndex], Y[selectedIndex], POINT_RADIUS, redPointPaint);
                                 invalidate();
@@ -194,28 +183,19 @@ public class GesturePasswordView extends View {
     }
 
     private void clearOldLine() {
-        if (lastStartX != -1 && lastStartY != -1) {
-            mCanvas.drawLine(lastStartX, lastStartY, lastEventX, lastEventY, clearLinePaint);
-            invalidate();
-        }
+        mPath.reset();
+        mCanvas.drawPath(mPath, linePaint);
+        invalidate();
     }
 
     private void drawNewLine(float eventX, float eventY) {
         float centerX = X[inputList.get(inputList.size() - 1)];
         float centerY = Y[inputList.get(inputList.size() - 1)];
-        double newInstance = Math.sqrt(
-                (eventX - centerX) * (eventX - centerX)
-                + (eventY - centerY) * (eventY - centerY));
-        double sin = (eventY - centerY) / newInstance;
-        double cos = (eventX - centerX) / newInstance;
-        float newStartX = centerX + POINT_RADIUS * (float) cos;
-        float newStartY = centerY + POINT_RADIUS * (float) sin;
-        mCanvas.drawLine(newStartX, newStartY, eventX, eventY, linePaint);
+        mPath.reset();
+        mPath.moveTo(centerX, centerY);
+        mPath.lineTo(eventX, eventY);
+        mCanvas.drawPath(mPath, linePaint);
         invalidate();
-        lastStartX = newStartX;
-        lastStartY = newStartY;
-        lastEventX = eventX;
-        lastEventY = eventY;
     }
 
     private int getSelectedPoint(float eventX, float eventY) {
