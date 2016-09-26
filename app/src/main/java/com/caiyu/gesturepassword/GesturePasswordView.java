@@ -32,14 +32,13 @@ public class GesturePasswordView extends View {
     private Paint linePaint;
     private Paint whitePointPaint;
     private Paint redPointPaint;
-    private Paint mBitmapPaint;
-
-    private Bitmap mBitmap;
-    private Canvas mCanvas;
 
     private Path mPath;
     
     private List<Integer> inputList = new ArrayList<>();
+
+    private float curEventX = -1;
+    private float curEventY = -1;
 
     private OnCompleteListener mOnCompleteListener;
 
@@ -69,8 +68,6 @@ public class GesturePasswordView extends View {
         redPointPaint = new Paint();
         redPointPaint.setAntiAlias(true);
         redPointPaint.setColor(COLOR_RED);
-
-        mBitmapPaint = new Paint();
 
         mPath = new Path();
     }
@@ -108,12 +105,12 @@ public class GesturePasswordView extends View {
                 TOTAL_WIDTH / 2, TOTAL_WIDTH / 2, TOTAL_WIDTH / 2,
                 TOTAL_WIDTH - POINT_RADIUS, TOTAL_WIDTH - POINT_RADIUS, TOTAL_WIDTH - POINT_RADIUS
         };
-        initView();
     }
 
     @Override
     public void onDraw(Canvas canvas) {
-        canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
+        drawPoints(canvas);
+        drawPath(canvas);
     }
     
     @Override
@@ -125,17 +122,15 @@ public class GesturePasswordView extends View {
                 if (!inputList.isEmpty()) {
                     int selectedIndex = getSelectedPoint(event.getX(), event.getY());
                     if (selectedIndex == -1) {
-                        drawNewLine(event.getX(), event.getY());
+                        curEventX = event.getX();
+                        curEventY = event.getY();
+                        invalidate();
                     }
                     else {  //触摸到某个点
                         if (selectedIndex != inputList.get(inputList.size() - 1)) {
-                            drawNewLine(X[selectedIndex], Y[selectedIndex]);
-                            mPath = new Path();
-                            if (!inputList.contains(selectedIndex)) {
-                                mCanvas.drawCircle(X[selectedIndex], Y[selectedIndex], POINT_RADIUS, redPointPaint);
-                                invalidate();
-                            }
                             inputList.add(selectedIndex);
+                            curEventX = curEventY = -1;
+                            invalidate();
                         }
                     }
                 }
@@ -143,7 +138,6 @@ public class GesturePasswordView extends View {
                     int selectedIndex = getSelectedPoint(event.getX(), event.getY());
                     if (selectedIndex != -1) {
                         inputList.add(selectedIndex);
-                        mCanvas.drawCircle(X[selectedIndex], Y[selectedIndex], POINT_RADIUS, redPointPaint);
                         invalidate();
                     }
                 }
@@ -162,19 +156,37 @@ public class GesturePasswordView extends View {
         return true;
     }
 
-    private void initView() {
-        inputList.clear();
-        
-        mBitmap = Bitmap.createBitmap(TOTAL_WIDTH, TOTAL_WIDTH, Bitmap.Config.ARGB_8888);
-        mCanvas = new Canvas(mBitmap);
-
+    private void drawPoints(Canvas canvas) {
         for (int i = 0; i < POINT_COUNT; i++) {
-            mCanvas.drawCircle(X[i], Y[i], POINT_RADIUS, whitePointPaint);
+            Paint paint;
+            if (inputList.contains(i)) {
+                paint = redPointPaint;
+            } else {
+                paint = whitePointPaint;
+            }
+            canvas.drawCircle(X[i], Y[i], POINT_RADIUS, paint);
         }
     }
 
+    private void drawPath(Canvas canvas) {
+        mPath.reset();
+        for (int i = 0; i < inputList.size(); i++) {
+            if (i == 0) {
+                mPath.moveTo(X[inputList.get(i)], Y[inputList.get(i)]);
+            }
+            else {
+                mPath.lineTo(X[inputList.get(i)], Y[inputList.get(i)]);
+            }
+        }
+        if (curEventX != -1 && curEventY != -1) {
+            mPath.lineTo(curEventX, curEventY);
+        }
+        canvas.drawPath(mPath, linePaint);
+    }
+
     public void reset() {
-        initView();
+        inputList.clear();
+        curEventX = curEventY = -1;
         invalidate();
     }
 
@@ -183,18 +195,7 @@ public class GesturePasswordView extends View {
     }
 
     private void clearOldLine() {
-        mPath.reset();
-        mCanvas.drawPath(mPath, linePaint);
-        invalidate();
-    }
-
-    private void drawNewLine(float eventX, float eventY) {
-        float centerX = X[inputList.get(inputList.size() - 1)];
-        float centerY = Y[inputList.get(inputList.size() - 1)];
-        mPath.reset();
-        mPath.moveTo(centerX, centerY);
-        mPath.lineTo(eventX, eventY);
-        mCanvas.drawPath(mPath, linePaint);
+        curEventX = curEventY = -1;
         invalidate();
     }
 
