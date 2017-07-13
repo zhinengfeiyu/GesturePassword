@@ -6,6 +6,7 @@
     tools:context="com.caiyu.gesturepassword.MainActivity"
     android:background="@android:color/darker_gray">
 
+
     <TextView
         android:id="@+id/resultTv"
         android:layout_width="wrap_content"
