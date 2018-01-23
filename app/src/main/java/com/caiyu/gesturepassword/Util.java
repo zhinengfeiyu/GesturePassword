@@ -33,4 +33,6 @@ public class Util {
 
     public void test() {}
 
+    public void t1234() {}
+
 }
