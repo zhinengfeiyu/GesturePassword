@@ -35,6 +35,8 @@ public class Util {
 
     public void t12345() {
         int a = 1;
+        int b = 2;
+        return;
     }
 
 }
