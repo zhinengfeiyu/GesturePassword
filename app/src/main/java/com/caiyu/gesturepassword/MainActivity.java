@@ -10,6 +10,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    
     private TextView resultTv;
     private Button resetBtn;
     private GesturePasswordView gesturePasswordView;
@@ -19,8 +20,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        resultTv = (TextView) findViewById(R.id.resultTv); //
-        resetBtn = (Button) findViewById(R.id.resetBtn);    //
+        resultTv = (TextView) findViewById(R.id.resultTv); 
+        resetBtn = (Button) findViewById(R.id.resetBtn);    
         gesturePasswordView = (GesturePasswordView) findViewById(R.id.gesture);
 
         gesturePasswordView.setOnCompleteListener(new GesturePasswordView.OnCompleteListener() {
@@ -30,8 +31,9 @@ public class MainActivity extends AppCompatActivity {
                 sb.append("密码：[ ");
                 for (int i = 0; i < result.size(); i++) {
                     sb.append(result.get(i) + 1);
-                    if (i != result.size() - 1)
+                    if (i != result.size() - 1) {
                         sb.append(", ");
+                    }
                 }
                 sb.append(" ]");
                 resultTv.setText(sb.toString());
@@ -39,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         resetBtn.setOnClickListener(new View.OnClickListener() {
+            
             @Override
             public void onClick(View view) {
                 resultTv.setText("请输入密码");
