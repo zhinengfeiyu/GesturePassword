@@ -19,8 +19,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        resultTv = (TextView) findViewById(R.id.resultTv);
-        resetBtn = (Button) findViewById(R.id.resetBtn);
+        resultTv = (TextView) findViewById(R.id.resultTv); //
+        resetBtn = (Button) findViewById(R.id.resetBtn);    //
         gesturePasswordView = (GesturePasswordView) findViewById(R.id.gesture);
 
         gesturePasswordView.setOnCompleteListener(new GesturePasswordView.OnCompleteListener() {
