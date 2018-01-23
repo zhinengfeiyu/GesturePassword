@@ -33,7 +33,7 @@ public class Util {
 
     public void test() {}
 
-    public void t1234() {
+    public void t12345() {
         int a = 1;
     }
 
