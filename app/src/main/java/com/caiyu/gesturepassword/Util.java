@@ -12,7 +12,7 @@ public class Util {
 
     //dp转px
     public static int dp2px(Context context, float dpValue) {
-        float scale=context.getResources().getDisplayMetrics().density;
+        float scale = context.getResources().getDisplayMetrics().density;
         return (int) (dpValue * scale + 0.5f);
     }
 
