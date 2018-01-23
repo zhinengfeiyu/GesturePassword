@@ -33,8 +33,10 @@ public class Util {
 
     public void test() {}
 
-    public void t1234() {
+    public void abcdefg() {
         int a = 1;
+        int b = 2;
+        return;
     }
 
 }
