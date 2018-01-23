@@ -41,7 +41,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         resetBtn.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View view) {
                 resultTv.setText("请输入密码");
